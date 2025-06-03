@@ -2,11 +2,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 
 const s3 = new S3Client({ region: "ap-south-1"
-    ,
-    credentials: {
-        accessKeyId: "AKIAS6J7P7ECLWHBSPL6",
-        secretAccessKey: "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"
-    }
+    
  });
 
 function generateSignalData() {
