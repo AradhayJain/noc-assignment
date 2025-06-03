@@ -4,6 +4,7 @@ import cors from 'cors';
 import userRoutes from './routes/user.route.js';
 import { db } from './utils/db.js';
 import path from 'path';
+import "./signalling/Schedule.js"
 
 
 const app = express();

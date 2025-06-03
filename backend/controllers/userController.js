@@ -49,13 +49,16 @@ export const loginUser=asyncHandler(async (req,res)=>{
             res.status(401).json({ message: 'Invalid email or password' });
             return;
         }
+        console.log(user.id)
+        const token=generateToken(user.id)
+        console.log(token)
         
         res.status(200).json({
             message: 'Login successful',
             userId: user.id,
             username: user.username,
             email: user.email,
-            token: generateToken(user.id)
+            token: token
         });
     });
 });
