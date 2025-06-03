@@ -15,6 +15,7 @@ const s3 = new S3Client({ region: "ap-south-1"
 
 export const fetchAllDataFromFolder = async (req, res) => {
   const folderPrefix = "data/"; // default folder
+  console.log("first")
 
   try {
     // Step 1: List all objects in the folder
@@ -22,6 +23,8 @@ export const fetchAllDataFromFolder = async (req, res) => {
       Bucket: "n0c",
       Prefix: folderPrefix,
     });
+
+    console.log("second")
 
     const listedObjects = await s3.send(listCommand);
 
@@ -37,11 +40,13 @@ export const fetchAllDataFromFolder = async (req, res) => {
         Bucket: "n0c",
         Key: obj.Key,
       });
+      console.log("three")
 
       const response = await s3.send(getObjectCommand);
       const fileContent = await streamToString(response.Body);
       try {
         allData.push(JSON.parse(fileContent)); 
+        console.log("four")
       } catch (err) {
         allData.push({ key: obj.Key, raw: fileContent }); 
       }
