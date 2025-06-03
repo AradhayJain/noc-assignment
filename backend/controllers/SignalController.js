@@ -9,7 +9,7 @@ const streamToString = (stream) =>
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
   });
 
-const s3Client = new S3Client({ region: "ap-south-1"
+const s3 = new S3Client({ region: "ap-south-1"
 
  });
 
@@ -23,7 +23,7 @@ export const fetchAllDataFromFolder = async (req, res) => {
       Prefix: folderPrefix,
     });
 
-    const listedObjects = await s3Client.send(listCommand);
+    const listedObjects = await s3.send(listCommand);
 
     if (!listedObjects.Contents || listedObjects.Contents.length === 0) {
       return res.status(404).json({ message: "No files found in the folder." });
@@ -38,12 +38,12 @@ export const fetchAllDataFromFolder = async (req, res) => {
         Key: obj.Key,
       });
 
-      const response = await s3Client.send(getObjectCommand);
+      const response = await s3.send(getObjectCommand);
       const fileContent = await streamToString(response.Body);
       try {
-        allData.push(JSON.parse(fileContent)); // If JSON file
+        allData.push(JSON.parse(fileContent)); 
       } catch (err) {
-        allData.push({ key: obj.Key, raw: fileContent }); // If plain text
+        allData.push({ key: obj.Key, raw: fileContent }); 
       }
     }
 
