@@ -1,4 +1,5 @@
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import asyncHandler from "express-async-handler";
 
 // Helper to convert stream to string
 console.log("five")
@@ -15,7 +16,7 @@ console.log("six")
 const s3 = new S3Client({ region: "ap-south-1"
  });
 
-export const fetchAllDataFromFolder = async (req, res) => {
+export const fetchAllDataFromFolder = asyncHandler(async (_, res) => {
   console.log("seven")
   const folderPrefix = "data/"; // default folder
   console.log("first")
@@ -60,4 +61,4 @@ export const fetchAllDataFromFolder = async (req, res) => {
     console.error("S3 Fetch Error:", err);
     res.status(500).json({ error: "Failed to fetch S3 data" });
   }
-};
+});
