@@ -10,11 +10,11 @@ import {
   const s3 = new S3Client({ region: "ap-south-1"
     ,
     credentials: {
-        accessKeyId: "AKIAS6J7P7ECERVKYDG6",
-        secretAccessKey: "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"
+        accessKeyId: "AKIAS6J7P7ECLWHBSPL6",
+        secretAccessKey: "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"
     }
  });
-  const BUCKET = "n0c-bucket";
+  const BUCKET = "n0c";
   
   export async function processSignals() {
     console.log("🔄 Starting signal processing...");

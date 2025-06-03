@@ -12,18 +12,18 @@ const streamToString = (stream) =>
 const s3Client = new S3Client({ region: "ap-south-1"
     ,
     credentials: {
-        accessKeyId: "AKIAS6J7P7ECERVKYDG6",
-        secretAccessKey: "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"
+        accessKeyId: "AKIAS6J7P7ECLWHBSPL6",
+        secretAccessKey: "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"
     }
  });
 
 export const fetchAllDataFromFolder = async (req, res) => {
-  const folderPrefix = req.query.prefix || "data/"; // default folder
+  const folderPrefix = "data/"; // default folder
 
   try {
     // Step 1: List all objects in the folder
     const listCommand = new ListObjectsV2Command({
-      Bucket: "n0c-bucket",
+      Bucket: "n0c",
       Prefix: folderPrefix,
     });
 
@@ -38,7 +38,7 @@ export const fetchAllDataFromFolder = async (req, res) => {
     // Step 2: Loop through each object and fetch its content
     for (const obj of listedObjects.Contents) {
       const getObjectCommand = new GetObjectCommand({
-        Bucket: "n0c-bucket",
+        Bucket: "n0c",
         Key: obj.Key,
       });
 

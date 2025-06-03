@@ -35,12 +35,7 @@ const Dashboard = () => {
     const fetchSensorData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3000/api/users/data", {
-          params: { prefix: "data/" },
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await axios.get("http://localhost:3000/api/users/data");
 
         const allData = response.data.data.flatMap((device) =>
           device.signals.map((signal) => ({

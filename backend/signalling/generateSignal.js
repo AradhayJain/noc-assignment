@@ -4,8 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 const s3 = new S3Client({ region: "ap-south-1"
     ,
     credentials: {
-        accessKeyId: "AKIAS6J7P7ECERVKYDG6",
-        secretAccessKey: "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"
+        accessKeyId: "AKIAS6J7P7ECLWHBSPL6",
+        secretAccessKey: "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"
     }
  });
 
@@ -25,7 +25,7 @@ function generateSignalData() {
     return dataPoints;
 }
 
-export async function generateDataAndUpload() {
+ export async function generateDataAndUpload() {
     console.log("generating new signals")
     const signalData = {
         deviceId: uuidv4(),
@@ -36,7 +36,7 @@ export async function generateDataAndUpload() {
     const key = `data/${signalData.deviceId}.json`;
 
     const command = new PutObjectCommand({
-        Bucket: "n0c-bucket",
+        Bucket: "n0c",
         Key: key,
         Body: JSON.stringify(signalData),
         ContentType: "application/json"
@@ -45,5 +45,6 @@ export async function generateDataAndUpload() {
     await s3.send(command);
     return key;
 }
+generateSignalData();
 
 
