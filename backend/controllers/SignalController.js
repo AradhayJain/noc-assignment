@@ -1,6 +1,7 @@
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 // Helper to convert stream to string
+console.log("five")
 const streamToString = (stream) =>
   new Promise((resolve, reject) => {
     const chunks = [];
@@ -9,11 +10,13 @@ const streamToString = (stream) =>
     stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
   });
 
-const s3 = new S3Client({ region: "ap-south-1"
+console.log("six")
 
+const s3 = new S3Client({ region: "ap-south-1"
  });
 
 export const fetchAllDataFromFolder = async (req, res) => {
+  console.log("seven")
   const folderPrefix = "data/"; // default folder
   console.log("first")
 
