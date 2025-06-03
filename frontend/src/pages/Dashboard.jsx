@@ -35,7 +35,7 @@ const Dashboard = () => {
     const fetchSensorData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("http://localhost:3000/api/users/folder_data");
+        const response = await axios.get("http://localhost:3000/api/s3/folder_data");
 
         const allData = response.data.data.flatMap((device) =>
           device.signals.map((signal) => ({
