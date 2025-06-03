@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './routes/user.route.js';
 import { db } from './utils/db.js';
+import path from 'path';
 
 
 const app = express();
@@ -16,11 +17,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-app.get('/', (_, res) => {
-    res.send('Welcome to the backend server!');
-}
-);
 
 app.use('/api/users', userRoutes);
 
