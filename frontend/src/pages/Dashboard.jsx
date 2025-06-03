@@ -65,6 +65,11 @@ const Dashboard = () => {
     fetchSensorData();
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
   const filteredData = allSignals.filter((entry) => {
     const time = dayjs(entry.timestamp);
     const fromTime = from ? dayjs(from) : null;
@@ -97,7 +102,15 @@ const Dashboard = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Sensor Dashboard</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-xl font-bold">Sensor Dashboard</h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
 
       {loading ? (
         <p>Loading...</p>
