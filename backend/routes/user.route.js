@@ -6,7 +6,11 @@ import { fetchAllDataFromFolder } from '../controllers/SignalController.js';
 const router= express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.get('/folder_data',fetchAllDataFromFolder);
+router.get('/folder_data', (req, res, next) => {
+    console.log("folder_data route triggered");
+    next();
+  }, fetchAllDataFromFolder);
+  
 
 
 export default router;
