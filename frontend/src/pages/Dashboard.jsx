@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Chart as ChartJS,
   LineElement,
@@ -16,33 +17,64 @@ import dayjs from "dayjs";
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const Dashboard = () => {
-  const [data, setData] = useState([]);
+  const [allSignals, setAllSignals] = useState([]);
+  const [deviceOptions, setDeviceOptions] = useState([]);
+  const [selectedDevice, setSelectedDevice] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const navigate=useNavigate();
-
-  useEffect(()=>{
-    if(!localStorage.getItem("token")){
-      navigate("/login")
-    }
-
-  })
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const mockData = Array.from({ length: 20 }, (_, i) => ({
-      timestamp: dayjs().subtract(i, "hour").toISOString(),
-      temperature: 20 + Math.random() * 5,
-      humidity: 40 + Math.random() * 10,
-      pressure: 1000 + Math.random() * 20,
-    })).reverse();
-    setData(mockData);
+    if (!localStorage.getItem("token")) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const fetchSensorData = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("http://localhost:3000/api/users/data", {
+          params: { prefix: "data/" },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const allData = response.data.data.flatMap((device) =>
+          device.signals.map((signal) => ({
+            ...signal,
+            deviceId: device.deviceId,
+          }))
+        );
+
+        allData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        setAllSignals(allData);
+
+        const deviceIds = [...new Set(response.data.data.map((d) => d.deviceId))];
+        setDeviceOptions(deviceIds);
+        setSelectedDevice(deviceIds[0] || "");
+      } catch (error) {
+        console.error("Error fetching sensor data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSensorData();
   }, []);
 
-  const filteredData = data.filter((entry) => {
+  const filteredData = allSignals.filter((entry) => {
     const time = dayjs(entry.timestamp);
     const fromTime = from ? dayjs(from) : null;
     const toTime = to ? dayjs(to) : null;
-    return (!fromTime || time.isAfter(fromTime)) && (!toTime || time.isBefore(toTime));
+
+    return (
+      entry.deviceId === selectedDevice &&
+      (!fromTime || time.isAfter(fromTime)) &&
+      (!toTime || time.isBefore(toTime))
+    );
   });
 
   const calculateAverage = (field) => {
@@ -51,92 +83,84 @@ const Dashboard = () => {
     return (sum / filteredData.length).toFixed(2);
   };
 
-  const commonOptions = {
-    responsive: true,
-    plugins: {
-      legend: { position: "top" },
-      title: { display: false },
-    },
-  };
-
-  const chartData = (label, field, borderColor) => ({
-    labels: filteredData.map((d) => dayjs(d.timestamp).format("HH:mm")),
+  const generateChartData = (field, label, borderColor) => ({
+    labels: filteredData.map((data) => dayjs(data.timestamp).format("HH:mm:ss")),
     datasets: [
       {
         label,
-        data: filteredData.map((d) => d[field]),
+        data: filteredData.map((data) => data[field]),
         borderColor,
         fill: false,
       },
     ],
-
   });
-  const handleLogout = ()=>{
-    console.log("loggin out")
-    localStorage.removeItem("token");
-    navigate("/login")
-  }
 
-  
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className=" flex justify-evenly">
-         <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Sensor Dashboard</h1>
-         <button onClick={handleLogout} className="absolute right-15 rounded-xl border-2 border-gray-200 px-12 py-4 bg-blue-300">Logout</button>
+    <div className="p-4">
+      <h1 className="text-xl font-bold mb-4">Sensor Dashboard</h1>
 
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <>
+          <div className="mb-4 flex flex-wrap gap-4">
+            <div>
+              <label className="mr-2 font-semibold">Select Device:</label>
+              <select
+                value={selectedDevice}
+                onChange={(e) => setSelectedDevice(e.target.value)}
+                className="border px-2 py-1 rounded"
+              >
+                {deviceOptions.map((id) => (
+                  <option key={id} value={id}>
+                    {id}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      </div>
-      
-      {/* Timestamp Filter */}
-      <div className="flex flex-col md:flex-row justify-center gap-4 mb-6">
-        <div>
-          <label className="block mb-1 font-medium">From:</label>
-          <input
-            type="datetime-local"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">To:</label>
-          <input
-            type="datetime-local"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="border rounded px-3 py-2"
-          />
-        </div>
-      </div>
+            <div>
+              <label className="mr-2">From:</label>
+              <input
+                type="datetime-local"
+                value={from}
+                onChange={(e) => setFrom(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+            </div>
 
-      {/* Averages */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white p-4 rounded-xl shadow text-center">
-          <h2 className="text-xl font-semibold text-gray-700">Avg. Temperature</h2>
-          <p className="text-2xl font-bold text-red-500">{calculateAverage("temperature")} °C</p>
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow text-center">
-          <h2 className="text-xl font-semibold text-gray-700">Avg. Humidity</h2>
-          <p className="text-2xl font-bold text-blue-500">{calculateAverage("humidity")} %</p>
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow text-center">
-          <h2 className="text-xl font-semibold text-gray-700">Avg. Pressure</h2>
-          <p className="text-2xl font-bold text-yellow-600">{calculateAverage("pressure")} hPa</p>
-        </div>
-      </div>
+            <div>
+              <label className="mr-2">To:</label>
+              <input
+                type="datetime-local"
+                value={to}
+                onChange={(e) => setTo(e.target.value)}
+                className="border px-2 py-1 rounded"
+              />
+            </div>
+          </div>
 
-      {/* Charts */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded-xl shadow">
-          <Line data={chartData("Temperature (°C)", "temperature", "rgb(255, 99, 132)")} options={commonOptions} />
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow">
-          <Line data={chartData("Humidity (%)", "humidity", "rgb(54, 162, 235)")} options={commonOptions} />
-        </div>
-        <div className="bg-white p-4 rounded-xl shadow md:col-span-2">
-          <Line data={chartData("Pressure (hPa)", "pressure", "rgb(255, 206, 86)")} options={commonOptions} />
-        </div>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Temperature</h2>
+              <Line data={generateChartData("temperature", "Temperature (°C)", "rgba(255, 99, 132, 1)")} />
+              <p className="mt-2">Average: {calculateAverage("temperature")} °C</p>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Humidity</h2>
+              <Line data={generateChartData("humidity", "Humidity (%)", "rgba(54, 162, 235, 1)")} />
+              <p className="mt-2">Average: {calculateAverage("humidity")} %</p>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Pressure</h2>
+              <Line data={generateChartData("pressure", "Pressure (hPa)", "rgba(75, 192, 192, 1)")} />
+              <p className="mt-2">Average: {calculateAverage("pressure")} hPa</p>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
