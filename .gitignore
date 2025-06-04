@@ -1,5 +1,3 @@
-# Ignore environment variables
-**/.env
 
 # Ignore node_modules in any folder
 **/node_modules/
