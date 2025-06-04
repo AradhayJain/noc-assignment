@@ -32,9 +32,10 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
+    console.log("trying... data")
     const fetchSensorData = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/s3/folder_data");
+        const response = await axios.get("/api/s3/folder_data");
         console.log("API response:", response.data);
 
         const allData = response.data.data.flatMap((device) =>
