@@ -91,10 +91,13 @@ const Dashboard = () => {
       for (const date of uniqueDates) {
         try {
           const res = await axios.get(`/api/s3/data?date=${date}`);
-          if (res.data && res.data.avg) {
+          if (res.data && res.data.averageTemperature !== undefined) {
             result.push({
-              date,
-              ...res.data.avg,
+              date: res.data.date,
+              count: res.data.count,
+              averageTemperature: res.data.averageTemperature,
+              averageHumidity: res.data.averageHumidity,
+              averagePressure: res.data.averagePressure,
             });
           }
         } catch (err) {
@@ -143,10 +146,9 @@ const Dashboard = () => {
 
     setCustomDateLoading(true);
     try {
-      // Optionally, add &deviceId=${selectedDevice} if your API supports device filtering
       const res = await axios.get(`/api/s3/data?date=${customDate}`);
-      if (res.data && res.data.avg) {
-        setCustomDateResult({ date: customDate, ...res.data.avg });
+      if (res.data && res.data.averageTemperature !== undefined) {
+        setCustomDateResult(res.data);
       } else {
         setCustomDateError("No data found for this date.");
       }
@@ -237,6 +239,7 @@ const Dashboard = () => {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="border px-4 py-2">Date</th>
+                  <th className="border px-4 py-2">Count</th>
                   <th className="border px-4 py-2">Avg Temp (°C)</th>
                   <th className="border px-4 py-2">Avg Humidity (%)</th>
                   <th className="border px-4 py-2">Avg Pressure (hPa)</th>
@@ -246,9 +249,10 @@ const Dashboard = () => {
                 {dateWiseAverages.map((entry) => (
                   <tr key={entry.date}>
                     <td className="border px-4 py-2">{entry.date}</td>
-                    <td className="border px-4 py-2">{entry.temperature?.toFixed(2) || "-"}</td>
-                    <td className="border px-4 py-2">{entry.humidity?.toFixed(2) || "-"}</td>
-                    <td className="border px-4 py-2">{entry.pressure?.toFixed(2) || "-"}</td>
+                    <td className="border px-4 py-2">{entry.count}</td>
+                    <td className="border px-4 py-2">{entry.averageTemperature?.toFixed(2) ?? "-"}</td>
+                    <td className="border px-4 py-2">{entry.averageHumidity?.toFixed(2) ?? "-"}</td>
+                    <td className="border px-4 py-2">{entry.averagePressure?.toFixed(2) ?? "-"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -279,6 +283,7 @@ const Dashboard = () => {
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="border px-4 py-2">Date</th>
+                    <th className="border px-4 py-2">Count</th>
                     <th className="border px-4 py-2">Avg Temp (°C)</th>
                     <th className="border px-4 py-2">Avg Humidity (%)</th>
                     <th className="border px-4 py-2">Avg Pressure (hPa)</th>
@@ -287,9 +292,10 @@ const Dashboard = () => {
                 <tbody>
                   <tr>
                     <td className="border px-4 py-2">{customDateResult.date}</td>
-                    <td className="border px-4 py-2">{customDateResult.temperature?.toFixed(2) || "-"}</td>
-                    <td className="border px-4 py-2">{customDateResult.humidity?.toFixed(2) || "-"}</td>
-                    <td className="border px-4 py-2">{customDateResult.pressure?.toFixed(2) || "-"}</td>
+                    <td className="border px-4 py-2">{customDateResult.count}</td>
+                    <td className="border px-4 py-2">{customDateResult.averageTemperature?.toFixed(2) ?? "-"}</td>
+                    <td className="border px-4 py-2">{customDateResult.averageHumidity?.toFixed(2) ?? "-"}</td>
+                    <td className="border px-4 py-2">{customDateResult.averagePressure?.toFixed(2) ?? "-"}</td>
                   </tr>
                 </tbody>
               </table>
