@@ -79,7 +79,7 @@ export const getDailyAverages = asyncHandler(async (req, res) => {
     });
 
     const listed = await s3.send(listCommand);
-    console.log(listed)
+    // console.log(listed)
     const files = listed.Contents || [];
 
     if (files.length === 0) {
@@ -124,6 +124,8 @@ export const getDailyAverages = asyncHandler(async (req, res) => {
       averageHumidity: +(humSum / count).toFixed(2),
       averagePressure: +(presSum / count).toFixed(2),
     };
+
+    console.log(result)
 
     res.status(200).json(result);
   } catch (err) {
