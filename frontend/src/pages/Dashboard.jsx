@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dateWiseAverages, setDateWiseAverages] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,12 +33,9 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("trying... data")
     const fetchSensorData = async () => {
       try {
         const response = await axios.get("/api/s3/folder_data");
-        console.log("API response:", response.data);
-
         const allData = response.data.data.flatMap((device) =>
           device.signals.map((signal) => ({
             ...signal,
@@ -60,6 +58,37 @@ const Dashboard = () => {
 
     fetchSensorData();
   }, []);
+
+  useEffect(() => {
+    const fetchDateWiseAverages = async () => {
+      if (!selectedDevice) return;
+
+      const uniqueDates = Array.from(
+        new Set(
+          filteredData.map((entry) => dayjs(entry.timestamp).format("YYYY-MM-DD"))
+        )
+      );
+
+      const result = [];
+      for (const date of uniqueDates) {
+        try {
+          const res = await axios.get(`/api/s3/data?date=${date}`);
+          if (res.data && res.data.avg) {
+            result.push({
+              date,
+              ...res.data.avg,
+            });
+          }
+        } catch (err) {
+          console.error(`Failed to fetch average for ${date}`, err);
+        }
+      }
+
+      setDateWiseAverages(result);
+    };
+
+    fetchDateWiseAverages();
+  }, [selectedDevice, from, to, allSignals]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -167,6 +196,31 @@ const Dashboard = () => {
               <Line data={generateChartData("pressure", "Pressure (hPa)", "rgba(75, 192, 192, 1)")} />
               <p className="mt-2">Average: {calculateAverage("pressure")} hPa</p>
             </div>
+          </div>
+
+          {/* DAILY AVERAGES TABLE from API */}
+          <div className="mt-10">
+            <h2 className="text-xl font-bold mb-4">Daily Averages (from API)</h2>
+            <table className="min-w-full border border-gray-300 text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border px-4 py-2">Date</th>
+                  <th className="border px-4 py-2">Avg Temp (°C)</th>
+                  <th className="border px-4 py-2">Avg Humidity (%)</th>
+                  <th className="border px-4 py-2">Avg Pressure (hPa)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dateWiseAverages.map((entry) => (
+                  <tr key={entry.date}>
+                    <td className="border px-4 py-2">{entry.date}</td>
+                    <td className="border px-4 py-2">{entry.temperature?.toFixed(2) || "-"}</td>
+                    <td className="border px-4 py-2">{entry.humidity?.toFixed(2) || "-"}</td>
+                    <td className="border px-4 py-2">{entry.pressure?.toFixed(2) || "-"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </>
       )}
