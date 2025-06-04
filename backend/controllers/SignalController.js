@@ -66,6 +66,7 @@ export const fetchAllDataFromFolder = asyncHandler(async (_, res) => {
 
 export const getDailyAverages = asyncHandler(async (req, res) => {
   const { date } = req.query; // format: YYYY-MM-DD
+  console.log("eight")
   if (!date) return res.status(400).json({ message: "Query parameter 'date' is required" });
 
   const prefix = "summary/";
