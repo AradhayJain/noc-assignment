@@ -17,7 +17,7 @@ export const protect = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // Decode token
-      const decoded = jwt.verify(token,process.env.SECRET_KEY);
+      const decoded = jwt.verify(token,"aradhay");
 
       // Query user from MySQL by id
       const [rows] = db.query("SELECT id, username, email FROM users WHERE id = ?", [decoded.id]);
