@@ -79,6 +79,7 @@ export const getDailyAverages = asyncHandler(async (req, res) => {
     });
 
     const listed = await s3.send(listCommand);
+    console.log(listed)
     const files = listed.Contents || [];
 
     if (files.length === 0) {
