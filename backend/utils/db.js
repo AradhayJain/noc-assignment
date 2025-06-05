@@ -2,7 +2,7 @@ import mysql from "mysql2"
 // import mysql from "mysql2/promise";
 
 export const db = mysql.createConnection({
-    host: 'database-1.crewcyuyu6kf.ap-south-1.rds.amazonaws.com', 
+    host: 'process.env.HOST', 
     user: 'admin',
     password: 'Aradhay1234', 
     database: 'auth_demo' 
